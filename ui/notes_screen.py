@@ -25,7 +25,7 @@ class NotesScreen(ctk.CTkFrame):
         
         progress_label = ctk.CTkLabel(
             header_frame,
-            text="1/3",
+            text="1/5",
             font=Fonts.BODY_BOLD,
             text_color=Colors.PRIMARY
         )
@@ -39,7 +39,7 @@ class NotesScreen(ctk.CTkFrame):
             fg_color=Colors.SURFACE
         )
         progress_bar.pack(fill="x", padx=30, pady=10)
-        progress_bar.set(0.33)
+        progress_bar.set(0.25)
         
         # Frame scrollable pour les notes
         notes_frame = ctk.CTkScrollableFrame(

@@ -5,7 +5,7 @@ Test direct sans interface
 import sys
 sys.path.insert(0, '.')
 
-from orientation_expert.core_.expert_engine import ExpertEngine
+from core_.expert_engine import ExpertEngine
 
 # Créer le moteur
 engine = ExpertEngine()

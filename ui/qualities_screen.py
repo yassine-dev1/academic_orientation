@@ -26,7 +26,7 @@ class QualitiesScreen(ctk.CTkFrame):
         
         progress_label = ctk.CTkLabel(
             header_frame,
-            text="3/3",
+            text="3/5",
             font=Fonts.BODY_BOLD,
             text_color=Colors.PRIMARY
         )
@@ -40,7 +40,7 @@ class QualitiesScreen(ctk.CTkFrame):
             fg_color=Colors.SURFACE
         )
         progress_bar.pack(fill="x", padx=30, pady=10)
-        progress_bar.set(1.0)
+        progress_bar.set(0.75)
         
         ctk.CTkLabel(
             self,
@@ -97,13 +97,13 @@ class QualitiesScreen(ctk.CTkFrame):
         
         evaluate_btn = ctk.CTkButton(
             nav_frame,
-            text="🔍 Évaluer mon profil",
+            text="Suivant →",
             font=Fonts.BUTTON,
             height=50,
             width=200,
             corner_radius=8,
-            fg_color=Colors.SUCCESS,
-            hover_color="#00B85A",
+            fg_color=Colors.PRIMARY,
+            hover_color=Colors.PRIMARY_DARK,
             command=self.save_and_evaluate
         )
         evaluate_btn.pack(side="right")
