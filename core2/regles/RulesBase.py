@@ -67,52 +67,52 @@ class RulesBase:
     # RÈGLES RIASEC (Holland)
     # ============================================
     def apply_riasec_rules(self, facts: StudentFact, scores: Dict[str, float]) -> Dict[str, float]:
-    """
-    Applique les bonus/malus RIASEC selon la matrice de scoring.
-    
-    Règles :
-    - Score > 7 : bonus élevé (fort intérêt)
-    - Score 5-7 : bonus modéré (intérêt moyen)
-    - Score 3-5 : pas de changement (neutre)
-    - Score < 3 : malus (désintérêt fort)
-    
-    Formule bonus : (score - 5) * coeff * facteur_normalisation
-    Formule malus : (score - 5) * coeff * 0.5 (pour scores < 5)
-    """
-    if not facts.riasec:
-        return scores
-    
-    riasec_activated = False
-    NORMALIZATION_FACTOR = 0.5  # Évite que RIASEC domine trop
-    MAX_BONUS_PER_DOMAIN = 15    # Plafond pour un domaine
-    
-    for trait, score in facts.riasec.items():
-        if trait not in self.riasec_matrix:
-            continue
-            
-        coefficients = self.riasec_matrix[trait]
-        
-        for domain, coeff in coefficients.items():
-            if coeff == 0:
+        """
+        Applique les bonus/malus RIASEC selon la matrice de scoring.
+
+        Règles :
+        - Score > 7 : bonus élevé (fort intérêt)
+        - Score 5-7 : bonus modéré (intérêt moyen)
+        - Score 3-5 : pas de changement (neutre)
+        - Score < 3 : malus (désintérêt fort)
+
+        Formule bonus : (score - 5) * coeff * facteur_normalisation
+        Formule malus : (score - 5) * coeff * 0.5 (pour scores < 5)
+        """
+        if not facts.riasec:
+            return scores
+
+        riasec_activated = False
+        NORMALIZATION_FACTOR = 0.5  # Évite que RIASEC domine trop
+        MAX_BONUS_PER_DOMAIN = 15    # Plafond pour un domaine
+
+        for trait, score in facts.riasec.items():
+            if trait not in self.riasec_matrix:
                 continue
-            
-            if score > 5:
-                # Bonus pour intérêt élevé
-                excess = score - 5  # de 1 à 5
-                bonus = excess * coeff * NORMALIZATION_FACTOR
-                scores[domain] = scores.get(domain, 0) + bonus
-                riasec_activated = True
-                
-            elif score < 3:
-                # Malus pour désintérêt marqué
-                deficit = 3 - score  # de 1 à 2
-                malus = deficit * coeff * NORMALIZATION_FACTOR * 0.7
-                scores[domain] = scores.get(domain, 0) - malus
-                riasec_activated = True
-        
+
+            coefficients = self.riasec_matrix[trait]
+
+            for domain, coeff in coefficients.items():
+                if coeff == 0:
+                    continue
+
+                if score > 5:
+                    # Bonus pour intérêt élevé
+                    excess = score - 5  # de 1 à 5
+                    bonus = excess * coeff * NORMALIZATION_FACTOR
+                    scores[domain] = scores.get(domain, 0) + bonus
+                    riasec_activated = True
+
+                elif score < 3:
+                    # Malus pour désintérêt marqué
+                    deficit = 3 - score  # de 1 à 2
+                    malus = deficit * coeff * NORMALIZATION_FACTOR * 0.7
+                    scores[domain] = scores.get(domain, 0) - malus
+                    riasec_activated = True
+
         if riasec_activated:
             self.activated_rules.append("RIASEC")
-        
+
         return scores
     
     # ============================================
@@ -127,39 +127,38 @@ class RulesBase:
         """
         if not facts.valeurs:
             return scores
-        
+
         values_activated = False
-        NORMALIZATION_FACTOR = 0.5  # Évite que RIASEC domine trop
+        NORMALIZATION_FACTOR = 0.5  # Évite que les valeurs dominent trop
         MAX_BONUS_PER_DOMAIN = 15    # Plafond pour un domaine
 
-    for trait, score in facts.valeurs.items():
-        if trait not in self.values_matrix:
-            continue
-            
-        coefficients = self.values_matrix[trait]
-        
-        for domain, coeff in coefficients.items():
-            if coeff == 0:
+        for trait, score in facts.valeurs.items():
+            if trait not in self.values_matrix:
                 continue
-            
-            if score > 5:
-                # Bonus pour intérêt élevé
-                excess = score - 5  # de 1 à 5
-                bonus = excess * coeff * NORMALIZATION_FACTOR
-                scores[domain] = scores.get(domain, 0) + bonus
-                values_activated = True
-                
-            elif score < 3:
-                # Malus pour désintérêt marqué
-                deficit = 3 - score  # de 1 à 2
-                malus = deficit * coeff * NORMALIZATION_FACTOR * 0.7
-                scores[domain] = scores.get(domain, 0) - malus
-                values_activated = True
-                
-        
+
+            coefficients = self.values_matrix[trait]
+
+            for domain, coeff in coefficients.items():
+                if coeff == 0:
+                    continue
+
+                if score > 5:
+                    # Bonus pour valeur élevée
+                    excess = score - 5  # de 1 à 5
+                    bonus = excess * coeff * NORMALIZATION_FACTOR
+                    scores[domain] = scores.get(domain, 0) + bonus
+                    values_activated = True
+
+                elif score < 3:
+                    # Malus pour valeur rejetée
+                    deficit = 3 - score  # de 1 à 2
+                    malus = deficit * coeff * NORMALIZATION_FACTOR * 0.7
+                    scores[domain] = scores.get(domain, 0) - malus
+                    values_activated = True
+
         if values_activated:
             self.activated_rules.append("Valeurs Pro")
-        
+
         return scores
     
     # ============================================
