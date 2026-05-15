@@ -1,0 +1,5 @@
+# clipspy==1.0.0
+customtkinter
+matplotlib
+pillow
+reportlab
