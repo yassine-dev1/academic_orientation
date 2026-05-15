@@ -3,8 +3,8 @@ Moteur expert d'orientation académique - Version refactorisée
 Sépare les faits, les règles et le traitement
 """
 
-from typing import Dict, List, Any, Tuple
-from orientation_expert.core2.faits.StudentFactBase import StudentFact
+from typing import Dict, List, Any, Tuple, Optional
+from core2.faits.StudentFactBase import StudentFact
 from core2.regles import RulesBase
 from core2.traitement import ScoreCalculator, BonusCalculator
 
@@ -30,7 +30,9 @@ class ExpertEngine:
     def load_facts(self, 
                    notes: Dict[str, float],
                    preferences: List[str],
-                   qualites: List[str]):
+                   qualites: List[str],
+                   riasec: Optional[Dict[str, int]] = None,
+                   valeurs: Optional[Dict[str, int]] = None):
         """
         Charge les faits de l'étudiant dans la base de connaissances
         """
@@ -44,16 +46,28 @@ class ExpertEngine:
         
         for qualite in qualites:
             self.facts.add_qualite(qualite)
+        
+        # Charger les scores RIASEC
+        if riasec:
+            for trait, score in riasec.items():
+                self.facts.set_riasec(trait, score)
+        
+        # Charger les valeurs professionnelles
+        if valeurs:
+            for valeur, score in valeurs.items():
+                self.facts.set_valeur(valeur, score)
     
     def evaluate_student(self, 
                          notes: Dict[str, float],
                          preferences: List[str],
-                         qualites: List[str]) -> Dict[str, Any]:
+                         qualites: List[str],
+                         riasec: Optional[Dict[str, int]] = None,
+                         valeurs: Optional[Dict[str, int]] = None) -> Dict[str, Any]:
         """
         Évalue un étudiant avec le chaînage avant
         """
         # 1. Charger les faits
-        self.load_facts(notes, preferences, qualites)
+        self.load_facts(notes, preferences, qualites, riasec, valeurs)
         
         # 2. Initialiser les scores
         self.scores = self.score_calculator.init_scores()
@@ -62,6 +76,7 @@ class ExpertEngine:
             self._print_debug_info()
         
         # 3. Appliquer toutes les règles (chaînage avant)
+        #    Inclut: règles académiques + RIASEC + valeurs professionnelles
         self.scores = self.rules_engine.apply_all_rules(self.facts, self.scores)
         
         # 4. Appliquer les bonus de préférences
@@ -89,6 +104,10 @@ class ExpertEngine:
         print(f"📚 Notes: {self.facts.notes}")
         print(f"🎯 Préférences: {self.facts.preferences}")
         print(f"⭐ Qualités: {self.facts.qualites}")
+        if self.facts.riasec:
+            print(f"🧭 RIASEC: {self.facts.riasec}")
+        if self.facts.valeurs:
+            print(f"💎 Valeurs: {self.facts.valeurs}")
         print("-"*40)
     
     def _print_results(self, percentages: Dict[str, float]):
@@ -143,7 +162,26 @@ if __name__ == "__main__":
     preferences = ["technology", "engineering"]
     qualities = ["analytical", "logical", "problem-solving"]
     
-    result = engine.evaluate_student(notes, preferences, qualities)
+    # Test avec RIASEC et Valeurs
+    riasec = {
+        "realistic": 8,
+        "investigative": 9,
+        "artistic": 4,
+        "social": 5,
+        "enterprising": 6,
+        "conventional": 5
+    }
+    
+    valeurs = {
+        "stability": 6,
+        "creativity": 8,
+        "social_impact": 4,
+        "prestige": 5,
+        "autonomy": 7,
+        "leadership": 5
+    }
+    
+    result = engine.evaluate_student(notes, preferences, qualities, riasec, valeurs)
     
     best = engine.get_best_domain(result["percentages"])
     print(f"\n🏆 MEILLEURE ORIENTATION: {best[0]} ({best[1]:.1f}%)")

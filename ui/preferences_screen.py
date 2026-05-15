@@ -26,7 +26,7 @@ class PreferencesScreen(ctk.CTkFrame):
         
         progress_label = ctk.CTkLabel(
             header_frame,
-            text="2/3",
+            text="2/5",
             font=Fonts.BODY_BOLD,
             text_color=Colors.PRIMARY
         )
@@ -40,7 +40,7 @@ class PreferencesScreen(ctk.CTkFrame):
             fg_color=Colors.SURFACE
         )
         progress_bar.pack(fill="x", padx=30, pady=10)
-        progress_bar.set(0.66)
+        progress_bar.set(0.50)
         
         ctk.CTkLabel(
             self,

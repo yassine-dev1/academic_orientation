@@ -4,7 +4,7 @@ Chaque règle est une méthode distincte pour plus de clarté
 """
 
 from typing import Dict, List
-from orientation_expert.core2.faits.StudentFactBase import StudentFact
+from core2.faits.StudentFactBase import StudentFact
 
 
 class RulesBase:
@@ -15,6 +15,27 @@ class RulesBase:
     
     def __init__(self):
         self.activated_rules: List[str] = []
+        
+        # Matrice de scoring RIASEC → Domaines
+        # Chaque type RIASEC donne des points aux domaines selon sa pertinence
+        self.riasec_matrix = {
+            "realistic":      {"Ingenierie": 3, "Medecine": 0, "Design": 1, "Droit": 0, "Commerce": 0},
+            "investigative":  {"Ingenierie": 2, "Medecine": 3, "Design": 0, "Droit": 1, "Commerce": 0},
+            "artistic":       {"Ingenierie": 0, "Medecine": 0, "Design": 3, "Droit": 0, "Commerce": 0},
+            "social":         {"Ingenierie": 0, "Medecine": 2, "Design": 0, "Droit": 2, "Commerce": 1},
+            "enterprising":   {"Ingenierie": 0, "Medecine": 0, "Design": 0, "Droit": 1, "Commerce": 3},
+            "conventional":   {"Ingenierie": 1, "Medecine": 0, "Design": 0, "Droit": 2, "Commerce": 2},
+        }
+        
+        # Matrice de scoring Valeurs professionnelles → Domaines
+        self.values_matrix = {
+            "stability":      {"Ingenierie": 1, "Medecine": 2, "Design": 0, "Droit": 2, "Commerce": 1},
+            "creativity":     {"Ingenierie": 2, "Medecine": 0, "Design": 3, "Droit": 0, "Commerce": 1},
+            "social_impact":  {"Ingenierie": 0, "Medecine": 3, "Design": 0, "Droit": 2, "Commerce": 0},
+            "prestige":       {"Ingenierie": 1, "Medecine": 2, "Design": 0, "Droit": 2, "Commerce": 2},
+            "autonomy":       {"Ingenierie": 2, "Medecine": 0, "Design": 2, "Droit": 0, "Commerce": 1},
+            "leadership":     {"Ingenierie": 0, "Medecine": 0, "Design": 0, "Droit": 2, "Commerce": 3},
+        }
     
     def apply_all_rules(self, facts: StudentFact, scores: Dict[str, float]) -> Dict[str, float]:
         """
@@ -23,18 +44,123 @@ class RulesBase:
         """
         self.activated_rules = []
         
-        # Appliquer chaque règle
+        # Appliquer les règles académiques (notes + qualités)
         scores = self.rule_engineering(facts, scores)
         scores = self.rule_medicine(facts, scores)
         scores = self.rule_design(facts, scores)
         scores = self.rule_law(facts, scores)
         scores = self.rule_business(facts, scores)
         
+        # Appliquer les règles RIASEC
+        scores = self.apply_riasec_rules(facts, scores)
+        
+        # Appliquer les règles des valeurs professionnelles
+        scores = self.apply_values_rules(facts, scores)
+        
         return scores
     
     def get_activated_rules(self) -> List[str]:
         """Retourne la liste des règles qui ont été activées"""
         return self.activated_rules
+    
+    # ============================================
+    # RÈGLES RIASEC (Holland)
+    # ============================================
+    def apply_riasec_rules(self, facts: StudentFact, scores: Dict[str, float]) -> Dict[str, float]:
+    """
+    Applique les bonus/malus RIASEC selon la matrice de scoring.
+    
+    Règles :
+    - Score > 7 : bonus élevé (fort intérêt)
+    - Score 5-7 : bonus modéré (intérêt moyen)
+    - Score 3-5 : pas de changement (neutre)
+    - Score < 3 : malus (désintérêt fort)
+    
+    Formule bonus : (score - 5) * coeff * facteur_normalisation
+    Formule malus : (score - 5) * coeff * 0.5 (pour scores < 5)
+    """
+    if not facts.riasec:
+        return scores
+    
+    riasec_activated = False
+    NORMALIZATION_FACTOR = 0.5  # Évite que RIASEC domine trop
+    MAX_BONUS_PER_DOMAIN = 15    # Plafond pour un domaine
+    
+    for trait, score in facts.riasec.items():
+        if trait not in self.riasec_matrix:
+            continue
+            
+        coefficients = self.riasec_matrix[trait]
+        
+        for domain, coeff in coefficients.items():
+            if coeff == 0:
+                continue
+            
+            if score > 5:
+                # Bonus pour intérêt élevé
+                excess = score - 5  # de 1 à 5
+                bonus = excess * coeff * NORMALIZATION_FACTOR
+                scores[domain] = scores.get(domain, 0) + bonus
+                riasec_activated = True
+                
+            elif score < 3:
+                # Malus pour désintérêt marqué
+                deficit = 3 - score  # de 1 à 2
+                malus = deficit * coeff * NORMALIZATION_FACTOR * 0.7
+                scores[domain] = scores.get(domain, 0) - malus
+                riasec_activated = True
+        
+        if riasec_activated:
+            self.activated_rules.append("RIASEC")
+        
+        return scores
+    
+    # ============================================
+    # RÈGLES VALEURS PROFESSIONNELLES
+    # ============================================
+    def apply_values_rules(self, facts: StudentFact, scores: Dict[str, float]) -> Dict[str, float]:
+        """
+        Applique les bonus des valeurs professionnelles selon la matrice.
+        Pour chaque valeur au-dessus du seuil (5), on ajoute un bonus
+        proportionnel au score de l'étudiant.
+        Formule: bonus = (score_valeur - 5) * coefficient_matrice
+        """
+        if not facts.valeurs:
+            return scores
+        
+        values_activated = False
+        NORMALIZATION_FACTOR = 0.5  # Évite que RIASEC domine trop
+        MAX_BONUS_PER_DOMAIN = 15    # Plafond pour un domaine
+
+    for trait, score in facts.valeurs.items():
+        if trait not in self.values_matrix:
+            continue
+            
+        coefficients = self.values_matrix[trait]
+        
+        for domain, coeff in coefficients.items():
+            if coeff == 0:
+                continue
+            
+            if score > 5:
+                # Bonus pour intérêt élevé
+                excess = score - 5  # de 1 à 5
+                bonus = excess * coeff * NORMALIZATION_FACTOR
+                scores[domain] = scores.get(domain, 0) + bonus
+                values_activated = True
+                
+            elif score < 3:
+                # Malus pour désintérêt marqué
+                deficit = 3 - score  # de 1 à 2
+                malus = deficit * coeff * NORMALIZATION_FACTOR * 0.7
+                scores[domain] = scores.get(domain, 0) - malus
+                values_activated = True
+                
+        
+        if values_activated:
+            self.activated_rules.append("Valeurs Pro")
+        
+        return scores
     
     # ============================================
     # RÈGLE 1: INGÉNIERIE

@@ -15,6 +15,8 @@ class StudentFact:
     notes: Dict[str, float] = field(default_factory=dict)
     preferences: List[str] = field(default_factory=list)
     qualites: List[str] = field(default_factory=list)
+    riasec: Dict[str, int] = field(default_factory=dict)
+    valeurs: Dict[str, int] = field(default_factory=dict)
     
     def add_note(self, matiere: str, valeur: float) -> None:
         """Ajoute ou met à jour une note"""
@@ -34,10 +36,28 @@ class StudentFact:
         """Récupère une note, retourne 0 si non trouvée"""
         return self.notes.get(matiere.lower(), 0)
     
+    def set_riasec(self, trait: str, value: int) -> None:
+        """Définit un score RIASEC (R, I, A, S, E, C) entre 1 et 10"""
+        self.riasec[trait.lower()] = max(1, min(10, value))
+    
+    def get_riasec(self, trait: str) -> int:
+        """Récupère un score RIASEC, retourne 5 par défaut"""
+        return self.riasec.get(trait.lower(), 5)
+    
+    def set_valeur(self, valeur_name: str, value: int) -> None:
+        """Définit un score de valeur professionnelle entre 1 et 10"""
+        self.valeurs[valeur_name.lower()] = max(1, min(10, value))
+    
+    def get_valeur(self, valeur_name: str) -> int:
+        """Récupère un score de valeur professionnelle, retourne 5 par défaut"""
+        return self.valeurs.get(valeur_name.lower(), 5)
+    
     def to_dict(self) -> Dict:
         """Convertit en dictionnaire pour le débogage"""
         return {
             "notes": self.notes,
             "preferences": self.preferences,
-            "qualites": self.qualites
+            "qualites": self.qualites,
+            "riasec": self.riasec,
+            "valeurs": self.valeurs
         }

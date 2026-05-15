@@ -25,11 +25,13 @@ class ModernOrientationApp(ctk.CTk):
         self.engine = ExpertEngine()
         self.engine.set_debug(True)
         
-        # Données étudiant
+        # Données étudiant (ajout de riasec et valeurs)
         self.student_data = {
             "notes": {},
             "preferences": [],
-            "qualities": []
+            "qualities": [],
+            "riasec": {},
+            "valeurs": {}
         }
         
         # Configuration thème
@@ -104,8 +106,48 @@ class ModernOrientationApp(ctk.CTk):
         self.current_screen = QualitiesScreen(
             self.main_container,
             self.student_data,
-            self.evaluate_and_show_results,
+            self.show_riasec_screen,
             self.show_preferences_screen
+        )
+        self.current_screen.pack(fill="both", expand=True)
+    
+    # def show_personality_screen(self):
+    #     """Affiche l'écran RIASEC + Valeurs Professionnelles"""
+    #     self.clear_screen()
+        
+    #     from ui.personality_screen import PersonalityScreen
+    #     self.current_screen = PersonalityScreen(
+    #         self.main_container,
+    #         self.student_data,
+    #         self.evaluate_and_show_results,
+    #         self.show_qualities_screen
+    #     )
+    #     self.current_screen.pack(fill="both", expand=True)
+ 
+
+    def show_riasec_screen(self):
+        """Affiche l'écran RIASEC"""
+        self.clear_screen()
+        
+        from ui.riasec_screen import RiasecScreen
+        self.current_screen = RiasecScreen(
+            self.main_container,
+            self.student_data,
+            self.show_values_screen,
+            self.show_qualities_screen
+        )
+        self.current_screen.pack(fill="both", expand=True)
+
+    def show_values_screen(self):
+        """Affiche l'écran des Valeurs Professionnelles"""
+        self.clear_screen()
+        
+        from ui.values_screen import ValuesScreen
+        self.current_screen = ValuesScreen(
+            self.main_container,
+            self.student_data,
+            self.evaluate_and_show_results,
+            self.show_riasec_screen
         )
         self.current_screen.pack(fill="both", expand=True)
     

@@ -41,7 +41,9 @@ class LoadingScreen(ctk.CTkFrame):
             result = self.engine.evaluate_student(
                 notes=self.student_data["notes"],
                 preferences=self.student_data["preferences"],
-                qualites=self.student_data["qualities"]
+                qualites=self.student_data["qualities"],
+                riasec=self.student_data.get("riasec", {}),
+                valeurs=self.student_data.get("valeurs", {})
             )
             self.progress.stop()
             self.show_results(result)
