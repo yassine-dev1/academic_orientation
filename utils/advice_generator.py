@@ -10,7 +10,7 @@ import random
 import time
 
 # Configuration de l'API Gemini
-GEMINI_API_KEY = "AIzaSyAJ6jUbmOepJAPJqMu8lySVKmaARmmCNDo"
+GEMINI_API_KEY = "AIzaSyAukZQYPrVQTGEG5PLMwO_dY82mPKriT5w"
 
 class AdviceGenerator:
     """Générateur de conseils personnalisés avec IA"""
