@@ -10,7 +10,7 @@ import time
 import random
 
 # Configuration de l'API Gemini
-GEMINI_API_KEY = "AIzaSyAJ6jUbmOepJAPJqMu8lySVKmaARmmCNDo"
+GEMINI_API_KEY = "AIzaSyAukZQYPrVQTGEG5PLMwO_dY82mPKriT5w"
 
 class AILetterGenerator:
     """Générateur de lettres de motivation avec IA"""
